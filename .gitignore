@@ -1,0 +1,8 @@
+# dotenv environment variables file
+.env
+
+# macOS 
+.DS_Store
+
+# Hashicorp Packer
+packer_cache
