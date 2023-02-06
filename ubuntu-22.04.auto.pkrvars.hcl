@@ -5,8 +5,8 @@
 
 # OS Build Credentials
 
-#ssh_username                = "osadmin"
-#ssh_password                = "osadmin"
+#ssh_username
+#ssh_password
 
 # vSphere Objects
 
