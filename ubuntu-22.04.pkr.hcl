@@ -65,24 +65,6 @@ variable "vcenter_cluster" {
   default = ""
 }
 
-variable "vcenter_datastore" {
-  type    = string
-  description = "Required for clusters, or if the target host has multiple datastores."
-  default = ""
-}
-
-variable "vcenter_network" {
-  type    = string
-  description = "The network segment or port group name to which the primary virtual network adapter will be connected."
-  default = ""
-}
-
-variable "vcenter_folder" {
-  type    = string
-  description = "The VM folder in which the VM template will be created."
-  default = ""
-}
-
 # ISO Objects
 
 variable "iso_path" {
@@ -131,6 +113,12 @@ variable "vm_name" {
   default = ""
 }
 
+variable "vm_folder" {
+  type    = string
+  description = "The VM folder in which the VM template will be created."
+  default = ""
+}
+
 variable "vm_guest_os_type" {
   type    = string
   description = "The guest operating system type, also know as guestid."
@@ -155,19 +143,20 @@ variable "vm_cdrom_type" {
   default = ""
 }
 
-variable "vm_cpu_sockets" {
+variable "vm_cpu" {
   type = number
-  description = "The number of virtual CPUs sockets."
+  description = "The number of vCPUs"
 }
 
-variable "vm_cpu_cores" {
+variable "vm_ram" {
   type = number
-  description = "The number of virtual CPUs cores per socket."
+  description = "The amount of vRAM (in MB)"
 }
 
-variable "vm_mem_size" {
-  type = number
-  description = "The size for the virtual memory in MB."
+variable "vm_datastore" {
+  type    = string
+  description = "Required for clusters, or if the target host has multiple datastores."
+  default = ""
 }
 
 variable "vm_disk_size" {
@@ -175,15 +164,9 @@ variable "vm_disk_size" {
   description = "The size for the virtual disk in MB."
 }
 
-variable "thin_provision" {
+variable "vm_disk_thinprovisioned" {
   type = bool
   description = "Thin or Thick provisioning of the disk"
-}
-
-variable "disk_eagerly_scrub" {
-  type = bool
-  description = "eagrly scrub zeros"
-  default = false
 }
 
 variable "vm_disk_controller_type" {
@@ -194,6 +177,12 @@ variable "vm_disk_controller_type" {
 variable "vm_network_card" {
   type = string
   description = "The virtual network card type."
+  default = ""
+}
+
+variable "vm_network" {
+  type    = string
+  description = "The network segment or port group name to which the primary virtual network adapter will be connected."
   default = ""
 }
 
@@ -215,6 +204,10 @@ variable "shell_scripts" {
 
 locals {
   buildtime = formatdate("YYYY-MM-DD hh:mm ZZZ", timestamp())
+  templatevars = {
+    ssh_username = var.ssh_username,
+    ssh_hashed_password = var.ssh_hashed_password
+  }
 }
 
 ##################################################################################
@@ -238,17 +231,16 @@ source "vsphere-iso" "linux-ubuntu-server" {
   insecure_connection = var.vcenter_insecure_connection
   datacenter = var.vcenter_datacenter
   # Virtual Machine Hardware Configuration
-  CPUs = var.vm_cpu_sockets
-  cpu_cores = var.vm_cpu_cores
-  RAM = var.vm_mem_size
+  CPUs = var.vm_cpu
+  RAM = var.vm_ram
   firmware = var.vm_firmware
   tools_upgrade_policy = true
   # vCenter Location Configuration
   vm_name = var.vm_name
-  folder = var.vcenter_folder
+  folder = var.vm_folder
   cluster = var.vcenter_cluster
   host = var.vcenter_host
-  datastore = var.vcenter_datastore
+  datastore = var.vm_datastore
   # Run Configuration
   boot_order = "disk,cdrom"
   # Shutdown Configuration
@@ -266,14 +258,14 @@ source "vsphere-iso" "linux-ubuntu-server" {
 #        "./cloud-init/*"]
   cd_content = {
     "meta-data" = file("./cloud-init/meta-data")
-    "user-data" = templatefile("./cloud-init/user-data.pkrtpl.hcl", { ssh_username = var.ssh_username, ssh_hashed_password = var.ssh_hashed_password})
+    "user-data" = templatefile("./cloud-init/user-data.pkrtpl.hcl", local.templatevars)
   }
   cd_label = "cidata"
   # Create Configuration
   vm_version = var.vm_version
   guest_os_type = var.vm_guest_os_type
   network_adapters {
-    network = var.vcenter_network
+    network = var.vm_network
     network_card = var.vm_network_card
   }
   notes = "Built by HashiCorp Packer on ${local.buildtime}."
@@ -281,7 +273,7 @@ source "vsphere-iso" "linux-ubuntu-server" {
   storage {
     disk_size = var.vm_disk_size
     disk_controller_index = 0
-    disk_thin_provisioned = var.thin_provision
+    disk_thin_provisioned = var.vm_disk_thinprovisioned
   }
   # Communicator Configuration
   ssh_password = var.ssh_password

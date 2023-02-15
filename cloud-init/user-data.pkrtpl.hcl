@@ -12,13 +12,17 @@ autoinstall:
       ens160:
         dhcp4: true
     version: 2
+  user-data:
+    disable_root: false
+    chpasswd:
+      expire: false
+      list:
+        - root:${ssh_hashed_password}
   identity:
-    realname: OS Admin
-    username: ${ssh_username}
     hostname: ubuntu-server
+    username: ${ssh_username}
     password: ${ssh_hashed_password}
   ssh:
-    allow-pw: true
     authorized-keys: []
     install-server: true
   drivers:
@@ -27,3 +31,20 @@ autoinstall:
   kernel:
     package: linux-generic
   updates: security
+  late-commands:
+  - |
+    cat <<EOF | sudo tee /target/tmp/post-install.sh
+    #!/bin/bash
+    if grep -iq PermitRootLogin /target/etc/ssh/sshd_config; then
+        sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin yes/' /target/etc/ssh/sshd_config
+    else
+        echo "PermitRootLogin yes" >>  /target/etc/ssh/sshd_config
+    fi
+    if grep -iq PasswordAuthentication /target/etc/ssh/sshd_config; then
+        sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication yes/' /target/etc/ssh/sshd_config
+    else
+        echo "PasswordAuthentication yes" >>  /target/etc/ssh/sshd_config
+    fi
+    EOF
+  - chmod 755 /target/tmp/post-install.sh
+  - sudo sh /target/tmp/post-install.sh

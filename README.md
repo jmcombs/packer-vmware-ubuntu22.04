@@ -5,7 +5,8 @@ This is a template, using Hashicorp Packer, that aims to allow the process to be
 1Password CLI 2 and Docker are used in this.
 
 ```sh
-op run --env-file=.env -- docker run \
+op run --env-file=.1p.env -- docker run \
+--env-file=.env \
 --env PKR_VAR_ssh_username \
 --env PKR_VAR_ssh_password \
 --env PKR_VAR_ssh_hashed_password \
@@ -24,3 +25,7 @@ op run --env-file=.env -- docker run \
 hashicorp/packer:latest \
 build -on-error=ask .
 ```
+
+[Making a custom Ubuntu 20.04 LTS (Focal Fossa) VM template that works with cloud-init](https://medium.com/@dsykes012/making-a-custom-ubuntu-20-04-lts-focal-fossa-vm-template-that-works-with-cloud-init-2cfffb6783b4)
+[Ubuntu - VMware Template Cleanup Script](https://everythingshouldbevirtual.com/virtualization/ubuntu-vmware-template-cleanup-script/)
+[thehedgefrog/infrastructure-as-cattle](https://github.com/thehedgefrog/infrastructure-as-cattle/tree/main)

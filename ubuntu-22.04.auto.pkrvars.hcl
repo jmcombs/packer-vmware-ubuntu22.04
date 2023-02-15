@@ -1,6 +1,6 @@
 ##################################################################################
 # VARIABLES
-#  - Variables commented out are in secure vault
+#  - Variables commented out are in secure vault or passed as environment variables
 ##################################################################################
 
 # OS Build Credentials
@@ -8,33 +8,32 @@
 #ssh_username
 #ssh_password
 
-# vSphere Objects
+# vCenter Objects
 
 #vcenter_username
 #vcenter_password
 #vcenter_server
-vcenter_insecure_connection     = true
 #vcenter_datacenter
 #vcenter_cluster
-#vcenter_datastore
-#vcenter_network
-vcenter_folder                  = "Templates"
+#vcenter_insecure_connection
 
-# Virtual Machine Settings
+# Guest OS Objects
 
-vm_name                     = "Ubuntu 22.04 Minimal"
-vm_guest_os_type            = "ubuntu64Guest"
-vm_version                  = 19
-vm_firmware                 = "bios"
-vm_cdrom_type               = "sata"
-vm_cpu_sockets              = 2
-vm_cpu_cores                = 1
-vm_mem_size                 = 16384
-vm_disk_size                = 102400
-thin_provision              = false
-vm_disk_controller_type     = ["lsilogic"]
-vm_network_card             = "vmxnet3"
-vm_boot_wait                = "5s"
+#vm_name
+#vm_folder
+#vm_guest_os_type
+#vm_version
+#vm_firmware
+#vm_cdrom_type
+#vm_cpu
+#vm_ram
+#vm_datastore
+#vm_disk_size
+#vm_disk_thinprovisioned
+#vm_disk_controller_type
+#vm_network_card
+#vm_network
+#vm_boot_wait
 
 # ISO Objects
 
